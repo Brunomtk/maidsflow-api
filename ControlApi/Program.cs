@@ -117,18 +117,37 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "https://206.189.191.51",
-                "https://maidsflow.vercel.app"
+        policy
+            // Permite origens específicas + previews do Vercel do projeto "maidsflow"
+            .SetIsOriginAllowed(origin =>
+            {
+                if (string.IsNullOrWhiteSpace(origin)) return false;
 
-            )
+                // Origens fixas
+                if (origin.Equals("http://localhost:3000", StringComparison.OrdinalIgnoreCase)) return true;
+                if (origin.Equals("http://localhost:3001", StringComparison.OrdinalIgnoreCase)) return true;
+                if (origin.Equals("https://206.189.191.51", StringComparison.OrdinalIgnoreCase)) return true;
+                if (origin.Equals("https://maidsflow.vercel.app", StringComparison.OrdinalIgnoreCase)) return true;
+
+                // Liberar apenas previews do Vercel para ESTE projeto
+                // Ex.: https://maidsflow-git-minha-branch-xyz.vercel.app
+                try
+                {
+                    var host = new Uri(origin).Host;
+                    return host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase)
+                           && host.StartsWith("maidsflow", StringComparison.OrdinalIgnoreCase);
+                }
+                catch
+                {
+                    return false;
+                }
+            })
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
     });
 });
+
 
 var app = builder.Build();
 
