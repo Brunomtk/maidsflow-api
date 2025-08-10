@@ -120,7 +120,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "http://localhost:3000",
                 "http://localhost:3001",
-                "https://206.189.191.51"
+                "https://206.189.191.51",
+                "https://maidsflow.vercel.app"
+
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
